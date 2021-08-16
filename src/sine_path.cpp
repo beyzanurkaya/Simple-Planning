@@ -3,6 +3,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/pose.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
+#include "tf2/LinearMath/Quaternion.h"
 
 using namespace std;
 using namespace chrono_literals;
@@ -23,24 +24,32 @@ private:
 
         auto message = geometry_msgs::msg::PoseArray();
         geometry_msgs::msg::PoseArray poseArray;
-        geometry_msgs::msg::Pose p;
+
         poseArray.header.frame_id = "map";
         poseArray.header.stamp = this->now();
+       for(int i=0;i<=360;i++){
+           geometry_msgs::msg::Pose p;
+           p.position.x  = static_cast<float>(i);
+           p.position.y = 10*sin(static_cast<float>(i) * M_PI / 5);
+           poseArray.poses.push_back(p);
+       }
+       for(int i=0;i<poseArray.poses.size()-1;i++){
 
-        for(int i=0;i<=360;i++){
-            p.position.x  = static_cast<float>(i);
-            p.position.y = 10*sin(static_cast<float>(i) * M_PI / 5);
-            p.position.z = 0;
-            p.orientation.x  = 1;
-            p.orientation.y =  1;
-            p.orientation.z = 0;
-            p.orientation.w = 1;
-            poseArray.poses.push_back(p);
-        }
-        message = poseArray;
-        poses_publisher->publish(message);
+           geometry_msgs::msg::Pose &pose = poseArray.poses.at(i);
+           geometry_msgs::msg::Pose &pose_next = poseArray.poses.at(i+1);
+           auto angle = std::atan2(pose_next.position.y - pose.position.y, pose_next.position.x - pose.position.x);
+
+           tf2::Quaternion q;
+           q.setRPY(0, 0, angle);
+           pose.orientation.w = q.getW();
+           pose.orientation.x = q.getX();
+           pose.orientation.y = q.getY();
+           pose.orientation.z = q.getZ();
+
+       }
+       message = poseArray;
+       poses_publisher->publish(message);
     }
-
     rclcpp::Publisher<geometry_msgs::msg::PoseArray>::SharedPtr poses_publisher;
     rclcpp::TimerBase::SharedPtr timer_;
 };
