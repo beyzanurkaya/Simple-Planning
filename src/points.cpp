@@ -17,11 +17,18 @@ public:
     {
         markers_publisher = this->create_publisher<visualization_msgs::msg::MarkerArray>("points", 10);
         poses_subscriber = this->create_subscription<geometry_msgs::msg::PoseArray>("sine_path" , 10, bind(&PointsNode::topic_callback, this, _1));
+    }
 
+
+private:
+    void topic_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) const
+    {
+        auto message = visualization_msgs::msg::MarkerArray();
         visualization_msgs::msg::MarkerArray markerArray;
-
+        visualization_msgs::msg::Marker marker;
+        
         for(int i=0;i<=360;i++){
-            visualization_msgs::msg::Marker marker;
+
             marker.header.frame_id = "map";
             marker.ns = "my_namespace";
             marker.id = i;
@@ -39,22 +46,16 @@ public:
             marker.color.g = 0.0;
             marker.color.b = 0.0;
 
-            geometry_msgs::msg::Pose pose;
-            pose.position.x = static_cast<float>(i);
-            pose.position.y = 10*sin(static_cast<float>(i) * M_PI / 5);
-            pose.position.z = 0.0;
+
+            geometry_msgs::msg::Pose pose = msg->poses.at(i);
+            marker.pose.position.x = pose.position.x;
+            pose.position.y = pose.position.y;
+            pose.position.z = pose.position.z;
             marker.pose = pose;
             markerArray.markers.push_back(marker);
-            markers_publisher->publish(markerArray);
-
         }
-
-    }
-
-
-private:
-    void topic_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) const
-    {
+        message = markerArray;
+        markers_publisher->publish(message);
 
     }
 
