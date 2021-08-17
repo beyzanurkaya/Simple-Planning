@@ -3,7 +3,6 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/pose.hpp"
 #include "geometry_msgs/msg/pose_array.hpp"
-#include "visualization_msgs/msg/marker.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
 
 using namespace std;
@@ -38,20 +37,17 @@ private:
             marker.pose.orientation.y = 1.0;
             marker.pose.orientation.z = 0.0;
             marker.pose.orientation.w = 1.0;
-            marker.scale.x = 0.5;
-            marker.scale.y = 0.5;
-            marker.scale.z = 0.5;
+            marker.scale.x = 0.3;
+            marker.scale.y = 0.3;
+            marker.scale.z = 0.3;
             marker.color.a = 1.0;
-            marker.color.r = 1.0;
-            marker.color.g = 0.0;
+            marker.color.r = 0.5;
+            marker.color.g = 1.0;
             marker.color.b = 0.0;
 
+            geometry_msgs::msg::Pose p = msg->poses.at(i);
+            marker.pose = p;
 
-            geometry_msgs::msg::Pose pose = msg->poses.at(i);
-            marker.pose.position.x = pose.position.x;
-            pose.position.y = pose.position.y;
-            pose.position.z = pose.position.z;
-            marker.pose = pose;
             markerArray.markers.push_back(marker);
         }
         message = markerArray;
