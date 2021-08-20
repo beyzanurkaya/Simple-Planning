@@ -24,15 +24,21 @@ find_package(geometry_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(Eigen3 REQUIRED )
 
-add_executable(sine_path  src/sine_path.cpp)
-ament_target_dependencies(sine_path rclcpp std_msgs geometry_msgs)
 
-add_executable(points src/points.cpp)
-ament_target_dependencies(points rclcpp std_msgs geometry_msgs visualization_msgs nav_msgs)
+add_executable(sine_path_exe  src/sine_path.cpp)
+ament_target_dependencies(sine_path_exe rclcpp std_msgs geometry_msgs)
 
-add_executable(car  src/car.cpp)
-ament_target_dependencies(car rclcpp std_msgs geometry_msgs visualization_msgs nav_msgs)
+add_executable(points_exe src/points.cpp)
+ament_target_dependencies(points_exe rclcpp std_msgs geometry_msgs visualization_msgs nav_msgs)
+
+add_executable(car_exe  src/car.cpp)
+ament_target_dependencies(car_exe rclcpp std_msgs geometry_msgs visualization_msgs nav_msgs)
+
+include_directories(include
+        ${EIGEN3_INCLUDE_DIR})
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -40,17 +46,14 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-
-
 install(TARGETS
 
-        sine_path
-        points
-        car
+        sine_path_exe
+        points_exe
+        car_exe
 
         DESTINATION lib/${PROJECT_NAME}
         )
-
 install(DIRECTORY
 
         launch
