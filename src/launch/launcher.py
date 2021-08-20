@@ -10,21 +10,17 @@ def generate_launch_description():
         ),
         Node(
             package='motion_planning',
-            executable='sine_path',
+            executable='sine_path_exe',
             output='screen'
         ),
         Node(
             package='motion_planning',
-            executable='points',
+            executable='points_exe',
             output='screen'
         ),
         Node(
             package='motion_planning',
-            executable='car',
+            executable='car_exe',
             output='screen'
         )
     ])
-
-
-
-
