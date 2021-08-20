@@ -1,15 +1,8 @@
-#include <memory>
-#include <chrono>
-#include "rclcpp/rclcpp.hpp"
-#include "geometry_msgs/msg/pose.hpp"
-#include "geometry_msgs/msg/pose_array.hpp"
-#include "visualization_msgs/msg/marker.hpp"
-#include "visualization_msgs/msg/marker_array.hpp"
+#include "car.h"
 
 using namespace std;
 using namespace chrono_literals;
 using placeholders::_1;
-int x = 0;
 
 class CarNode : public rclcpp::Node
         {
@@ -24,13 +17,15 @@ class CarNode : public rclcpp::Node
 
         private:
 
-
             void topic_callback(const geometry_msgs::msg::PoseArray::SharedPtr msg) const
             {
+
+                int i = 0;
+
                 visualization_msgs::msg::Marker markerD;
                 markerD.header.frame_id = "map";
                 markerD.action = visualization_msgs::msg::Marker::DELETEALL;
-                int i = 0;
+
                 auto message = visualization_msgs::msg::Marker();
                 visualization_msgs::msg::Marker marker;
                 marker.header.frame_id = "map";
@@ -38,11 +33,6 @@ class CarNode : public rclcpp::Node
                 marker.id = 0;
                 marker.type = visualization_msgs::msg::Marker::CUBE;
                 marker.action = visualization_msgs::msg::Marker::ADD;
-
-                marker.pose.orientation.x = 0.0;
-                marker.pose.orientation.y = 0.0;
-                marker.pose.orientation.z = 0.0;
-                marker.pose.orientation.w = 1.0;
 
                 marker.scale.x = 4.0;
                 marker.scale.y = 1.5;
@@ -52,15 +42,34 @@ class CarNode : public rclcpp::Node
                 marker.color.g = 0.0f;
                 marker.color.b = 1.0f;
                 marker.color.a = 1.0;
+
                 do {
-                    geometry_msgs::msg::Pose p = msg->poses.at(i);
-                    marker.pose = p;
+
+                    geometry_msgs::msg::Pose &pose = msg->poses.at(i);
+                    geometry_msgs::msg::Pose &pose_next = msg->poses.at(i+1);
+                    geometry_msgs::msg::Pose &new_pose = msg->poses.at(i);
+                    geometry_msgs::msg::Pose &new_pose_next = msg->poses.at(i+1);
+                    if(i==0){
+                        marker.pose = pose;
+                        marker.pose.position.y = 2.0;
+                    }else{
+                        auto new_angle = atan2(new_pose_next.position.y - new_pose.position.y, new_pose_next.position.x - new_pose.position.x);
+                        double dx = cos(new_angle)*2;
+                        double dy = sin(new_angle)*2;
+                        new_pose.position.x = dx + pose.position.x;
+                        new_pose.position.y = dy + pose.position.y;
+                        marker.pose = new_pose;
+                    }
+
                     i++;
                     message = marker;
                     marker_publisher->publish(message);
                     rclcpp::sleep_for(1s);
                     marker_publisher->publish(markerD);
-                }while(i < 360);
+
+
+
+                }while(i < 180);
 
             }
 
@@ -77,3 +86,4 @@ int main(int argc, char * argv[])
     rclcpp::shutdown();
     return 0;
 }
+
